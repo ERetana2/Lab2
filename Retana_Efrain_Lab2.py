@@ -8,7 +8,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import time
+from time import process_time
 
 def read_image(imagefile):
     # Reads image in imagefile and returns color and gray-level images
@@ -24,8 +24,9 @@ def draw_rectangle(ax,r,c,h,w,color): # (r,c) coordinates for rectangle, h,w for
 #-----------------------------------------------------------------------------   
 # PROBLEM 1
 def brightest_pixel(ax,I,h,w):
+    time_start = process_time()
     imgMax = 0.0
-    #Iterate through all the pixels in the img to find brightest pixe;
+    #Iterate through all the pixels in the img to find brightest pixel
     for i in range(I.shape[0]):
         for j in range(I.shape[1]):
             currPixel = 0
@@ -36,10 +37,13 @@ def brightest_pixel(ax,I,h,w):
                 imgMax = currPixel
                 max_x_val = j
                 max_y_val = i
+    time_end = process_time()
+    print('Total Process Time:',time_end -time_start,'sec')
     draw_rectangle(ax,max_x_val - h/2,max_y_val-w/2,h,w,'red')
 #-------------------------------------------------------------------
 # PROBLEM 2
 def brightest_region(ax,img_gl,h,w):
+    time_start = process_time()
     # compute the brightest region inside of the matrix given h x w region using 
     # 4 for loops
     max_region = 0
@@ -57,10 +61,13 @@ def brightest_region(ax,img_gl,h,w):
                     max_region = curr_region
                     max_x_val = j
                     max_y_val = i
-    draw_rectangle(ax,max_x_val,max_y_val,h,w,'green')
+    time_end = process_time()
+    print('Total Process Time:',time_end -time_start,'sec')
+    draw_rectangle(ax,max_x_val,max_y_val,h,w,'yellow')
 #--------------------------------------------------------
 # PROBLEM 1.2
-def brightest_region1_2(img_gl,h,w):
+def brightest_region1_2(ax,img_gl,h,w):
+    time_start = process_time()
     # Compute brightest region by cutting 2 for loops and utilizing slicing
     max_region = 0
     for i in range(len(img_gl)-h): # iterate through rows 
@@ -73,8 +80,11 @@ def brightest_region1_2(img_gl,h,w):
                 max_region = sum_region
                 max_x_val = j
                 max_y_val = i
-    draw_rectangle(max_x_val,max_y_val,h,w,'red')
+    time_end = process_time()
+    print('Total Process Time:',time_end -time_start,'sec')
+    draw_rectangle(ax,max_x_val,max_y_val,h,w,'red')
 #-------------------------------------------------------
+# INTEGRAL IMAGE
 def integral(ax,img_gl,h,w):
     # compute integral image of matrix by doing cumulative sum function
     # and adding a row and column of 0s
@@ -86,7 +96,8 @@ def integral(ax,img_gl,h,w):
 #--------------------------------------------
 # PROBLEM 2.1     
 def brightest_region2_1(ax,img_gl,h,w):
-    integral_img = integral(img_gl,h,w)
+    time_start = process_time()
+    integral_img = integral(ax,img_gl,h,w)
     region_max = 0
     # iterate through rows and columns of each h x w square then obtain the top left
     #,bottom left, top right, and bottom left elements to compute the current region using
@@ -103,10 +114,13 @@ def brightest_region2_1(ax,img_gl,h,w):
                 region_max = curr_region
                 max_x_val = c
                 max_y_val = r
+    time_end = process_time()
+    print('Total Process Time:',time_end -time_start,'sec')
     draw_rectangle(ax,max_x_val + 1,max_y_val + 1,h,w,'yellow')
 #--------------------------------------------------------------
 # PROBLEM 2.2
 def brightest_region2_2(ax,img_gl,h,w):
+    time_start = process_time()
     integral_img = integral(ax,img_gl,h,w)
     #obtain 4 arrats containing each every bottom right, left, top right and left point for every
     # region inside of the integral img using slicing
@@ -118,12 +132,9 @@ def brightest_region2_2(ax,img_gl,h,w):
     sum = topLeft - topRight - botLeft + botRight
     max = np.max(sum)
     
-    sum_index = np.argwhere(sum[:]==max) # return the index of the sum that equals max
-    topleft_val = topLeft[sum_index[0][0]][sum_index[0][1]] # obtain top left value at the indices 
-                                                            # of the max sum
-    integral_index = np.argwhere(integral_img[:]==topleft_val) # search whole integral
-    # for value that equals top left value, plot a rectangle, which signals max/
-    # brightest region
+    integral_index = np.argwhere(sum[:]==max) # return the index of the sum that equals max
+    time_end = process_time()
+    print('Total Process Time:',time_end -time_start,'sec')
     draw_rectangle(ax,integral_index[0][1],integral_index[0][0],h,w,'yellow')
 #-------------------------------------------------------------------------------------       
 
@@ -145,9 +156,49 @@ if __name__ == "__main__":
             ax1.imshow(img)                  #Display color image
             ax2.imshow(img_gl,cmap='gray')   #Display gray-leval image
             plt.show()
-    #brightest_pixel(ax,img)
-    #brightest_region(aximg_gl,50,50)]
-    #brightest_region2_2(ax,img_gl,50,50)
-    #brightest_region2_1(ax,img_gl,50,50)
+            
+    imagepath = img_dir + "20110101_000001_1024_0171_c.png" # read individual picture 
+                                                    # from set of files
+    img,img_gl = read_image(imagepath)
+    #-----------------------------------------------------
+    # DRAW RECTANGLE
+    fig, (ax2) = plt.subplots(nrows=1, ncols=1)
+    ax2.imshow(img_gl,cmap = 'gray')
+    draw_rectangle(ax2,0,0,50,50,'yellow')
+    plt.show()
+    # --------------------------------------
+    # BRIGHTEST PIXEL 1
+    fig, (ax1) = plt.subplots(nrows=1, ncols=1)
+    ax1.imshow(img)
+    brightest_pixel(ax1,img,20,20)
+    plt.show()
+    
+    #----------------------------------------
+    # BRGHTEST REGION 2
+    fig, (ax2) = plt.subplots(nrows=1, ncols=1)
+    ax2.imshow(img_gl,cmap = 'gray')
+    brightest_region(ax2,img_gl,20,20)
+    plt.show()
+
+    #---------------------------------------
+    # BRIGHTEST REGION 1_2
+    fig, (ax2) = plt.subplots(nrows=1, ncols=1)
+    ax2.imshow(img_gl,cmap = 'gray')
+    brightest_region1_2(ax2,img_gl,20,20)
+    plt.show()
+    #----------------------------------------
+    #BRIGHTEST REGION 2_1
+    fig, (ax2) = plt.subplots(nrows=1, ncols=1)
+    ax2.imshow(img_gl,cmap = 'gray')
+    brightest_region2_1(ax2,img_gl,20,20)
+    plt.show()
+    #----------------------------------------
+    # BRIGHTEST REGION 2_2
+    fig, (ax2) = plt.subplots(nrows=1, ncols=1)
+    ax2.imshow(img_gl,cmap = 'gray')
+    brightest_region2_2(ax2,img_gl,20,20)
+    plt.show()
+    
+    
 
 
